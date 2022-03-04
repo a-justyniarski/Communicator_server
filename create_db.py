@@ -36,8 +36,8 @@ create_message_table = sql.SQL(("""CREATE TABLE IF NOT EXISTS {table_name}(
     to_id INTEGER,
     creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     text VARCHAR(255),
-    FOREIGN KEY (from_id) REFERENCES {table_name_foreign}(id),
-    FOREIGN KEY (to_id) REFERENCES {table_name_foreign}(id)
+    FOREIGN KEY (from_id) REFERENCES {table_name_foreign}(id) ON DELETE CASCADE,
+    FOREIGN KEY (to_id) REFERENCES {table_name_foreign}(id) ON DELETE CASCADE
     );
     """).format(table_name='message', table_name_foreign='users'))
 
@@ -47,7 +47,6 @@ try:
         cnx.autocommit = True
         cursor = cnx.cursor()
         with cnx, cursor:
-
             try:
                 cursor.execute(create_user_table)
                 print('Table user created')
@@ -59,7 +58,7 @@ try:
                 print('Table messages created')
             except DuplicateTable as err:
                 print(str(err).capitalize())
-except OperationalError:
-    print('Connection Error')
+    except OperationalError:
+        print('Connection Error')
 finally:
     cnx.close()
