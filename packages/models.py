@@ -24,7 +24,7 @@ class User:
                         VALUES(%s, %s) RETURNING id"""
             values = (self.username, self.hashed_password)
             cursor.execute(sql, values)
-            self._id = cursor.fetchone()['id']
+            self._id = cursor.fetchone()[0]
             return True
         else:
             sql = """UPDATE users SET username=%s, hashed_password=%s
@@ -103,7 +103,7 @@ class Message:
             sql = """INSERT INTO message(from_id, to_id, text) VALUES(%s, %s, %s) RETURNING id"""
             values = (self.from_id, self.to_id, self.text)
             cursor.execute(sql, values)
-            self._id, self._creation_date = cursor.fetchone()['id']
+            self._id, self._creation_date = cursor.fetchone()[0]
             return True
         else:
             sql = """UPDATE message SET to_id=%s, from_id=%s, text=%s WHERE id=%s"""
