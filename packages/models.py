@@ -61,6 +61,20 @@ class User:
         else:
             return None
 
+    @staticmethod
+    def load_all_users(cursor):
+        sql = "SELECT id, username, hashed_password FROM Users"
+        users = []
+        cursor.execute(sql)
+        for row in cursor.fetchall():
+            id_, username, hashed_password = row
+            loaded_user = User()
+            loaded_user._id = id_
+            loaded_user.username = username
+            loaded_user._hashed_password = hashed_password
+            users.append(loaded_user)
+        return users
+
     def delete(self, cursor):
         sql = "DELETE FROM Users WHERE id=%s"
         cursor.execute(sql, (self.id,))
@@ -86,34 +100,30 @@ class Message:
 
     def save_to_db(self, cursor):
         if self._id == -1:
-            sql = ("""INSERT INTO message(from_id, to_id, text) VALUES(%s, %s, %s) RETURNING id""")
+            sql = """INSERT INTO message(from_id, to_id, text) VALUES(%s, %s, %s) RETURNING id"""
             values = (self.from_id, self.to_id, self.text)
             cursor.execute(sql, values)
-            self._id, self.creation_date = cursor.fetchone()['id']
+            self._id, self._creation_date = cursor.fetchone()['id']
             return True
         else:
-            sql = ("""UPDATE message SET to_id=%s, from_id=%s, text=%s WHERE id=%s""")
-            values = (self.to_id, self.from_id, self.txt, self.id)
+            sql = """UPDATE message SET to_id=%s, from_id=%s, text=%s WHERE id=%s"""
+            values = (self.to_id, self.from_id, self.text, self.id)
             cursor.execute(sql, values)
             return True
-
-
 
     @staticmethod
     def load_all_messages(cursor, user_id=None):
         if user_id:
-            sql = ("""SELECT from_id, to_id, creation_date, text FROM message WHERE to_id=%s""")
+            sql = """SELECT from_id, to_id, creation_date, text FROM message WHERE to_id=%s"""
             cursor.execute(sql, (user_id,))
         else:
-            sql = ("""SELECT from_id, to_id, text, creation_date FROM message""")
+            sql = """SELECT from_id, to_id, text, creation_date FROM message"""
             cursor.execute(sql)
         messages = []
         for row in cursor.fetchall():
-            id, from_id, to_id, creation_date, text = row
+            id_, from_id, to_id, creation_date, text = row
             loaded_message = Message(from_id, to_id, text)
-            loaded_message._id = id
+            loaded_message._id = id_
             loaded_message._creation_date = creation_date
             messages.append(loaded_message)
         return messages
-
-
